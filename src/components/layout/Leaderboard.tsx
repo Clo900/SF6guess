@@ -32,8 +32,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ entries }) => {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">
-                {entry.correct_predictions} 胜
+              <span className="text-xs text-gray-500 font-mono">
+                {entry.total_items}/{entry.possible_items}
               </span>
               <span className="text-sm font-bold text-emerald-500 w-8 text-right">
                 {entry.score}

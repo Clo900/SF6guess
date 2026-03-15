@@ -76,5 +76,8 @@ export interface LeaderboardEntry {
   score: number;
   correct_predictions: number;
   total_predictions: number;
+  correct_items: number;
+  total_items: number;
+  possible_items: number;
   accuracy: number;
 }

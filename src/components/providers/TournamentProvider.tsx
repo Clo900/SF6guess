@@ -93,6 +93,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
               const userPredictions = allPredictions.filter(p => p.user_id === u.id);
               let score = 0;
               let correctCount = 0;
+              let correctItems = 0;
 
               userPredictions.forEach(p => {
                 const match = matchesData.find(m => m.id === p.match_id);
@@ -101,10 +102,12 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                   if (match.winner_id === p.predicted_winner_id) {
                     score += 5;
                     correctCount++;
+                    correctItems++;
                   }
                   // Points for correct score
                   if (match.score && match.score === p.predicted_score) {
                     score += 10;
+                    correctItems++;
                   }
                 }
               });
@@ -116,6 +119,9 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 score: score,
                 correct_predictions: correctCount,
                 total_predictions: userPredictions.length,
+                correct_items: correctItems,
+                total_items: userPredictions.length * 2,
+                possible_items: matchesData.length * 2,
                 accuracy: userPredictions.length > 0 ? (correctCount / userPredictions.length) * 100 : 0
               };
             });
