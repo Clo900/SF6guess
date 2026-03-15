@@ -11,17 +11,22 @@ interface MatchCardProps {
   prediction?: Prediction;
   onPredict?: (matchId: string, teamId: string, score: string) => void;
   onClear?: (matchId: string) => void;
+  format?: 'BO3' | 'FT2' | 'FT4';
 }
 
-export const MatchCard: React.FC<MatchCardProps> = ({ match, team1, team2, prediction, onPredict, onClear }) => {
+export const MatchCard: React.FC<MatchCardProps> = ({ match, team1, team2, prediction, onPredict, onClear, format = 'BO3' }) => {
   const predictedWinnerId = prediction?.predicted_winner_id;
   
-  // Show all score options for Best of 3
-  // Team 1 wins: 2:0, 2:1
-  // Team 2 wins: 0:2, 1:2
-  const scoreOptions = ['2:0', '2:1', '1:2', '0:2'];
+  // BO3/FT2: First to 2 (2:0, 2:1)
+  // FT4: First to 4 (4:0, 4:1, 4:2, 4:3)
+  const isFT4 = format === 'FT4';
+  
+  const scoreOptions = isFT4 
+    ? ['4:0', '4:1', '4:2', '4:3', '3:4', '2:4', '1:4', '0:4']
+    : ['2:0', '2:1', '1:2', '0:2'];
 
-  const handleScoreSelect = (score: string) => {
+  const handleScoreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const score = e.target.value;
     if (!onPredict) return;
     
     // Infer winner from score
@@ -30,7 +35,25 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, team1, team2, predi
     
     if (s1 > s2) {
       if (team1) winnerId = team1.id;
-    } else {
+    } else if (s2 > s1) {
+      if (team2) winnerId = team2.id;
+    }
+    
+    if (winnerId) {
+      onPredict(match.id, winnerId, score);
+    }
+  };
+
+  const handleScoreClick = (score: string) => {
+    if (!onPredict) return;
+    
+    // Infer winner from score
+    const [s1, s2] = score.split(':').map(Number);
+    let winnerId = '';
+    
+    if (s1 > s2) {
+      if (team1) winnerId = team1.id;
+    } else if (s2 > s1) {
       if (team2) winnerId = team2.id;
     }
     
@@ -99,26 +122,48 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, team1, team2, predi
         {/* Prediction Score Selector */}
         <div className="flex flex-col gap-1">
            <span className="text-[10px] text-gray-500 text-center">竞猜比分</span>
-           <div className="grid grid-cols-2 gap-1 justify-center">
-             {(team1 && team2) ? (
-               scoreOptions.map(score => (
-                 <button
-                   key={score}
-                   onClick={() => handleScoreSelect(score)}
-                   className={clsx(
-                     "px-1 py-1 text-[10px] rounded border transition-colors text-center",
-                     prediction?.predicted_score === score
-                       ? "bg-emerald-600 border-emerald-500 text-white"
-                       : "bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600"
-                   )}
-                 >
-                   {score}
-                 </button>
-               ))
-             ) : (
-               <span className="text-xs text-gray-600 py-1 col-span-2 text-center">等待选手</span>
-             )}
-           </div>
+           
+           {isFT4 ? (
+            <select
+              value={prediction?.predicted_score || ''}
+              onChange={handleScoreSelect}
+              disabled={!team1 || !team2}
+              className={clsx(
+                "w-full px-2 py-1 text-xs rounded border transition-colors text-center cursor-pointer",
+                prediction?.predicted_score
+                  ? "bg-emerald-600 border-emerald-500 text-white font-bold"
+                  : "bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600"
+              )}
+            >
+              <option value="" disabled>选择比分</option>
+              {scoreOptions.map(score => (
+                <option key={score} value={score} className="bg-slate-800 text-gray-300">
+                  {score}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="grid grid-cols-2 gap-1 justify-center">
+              {(team1 && team2) ? (
+                scoreOptions.map(score => (
+                  <button
+                    key={score}
+                    onClick={() => handleScoreClick(score)}
+                    className={clsx(
+                      "px-1 py-1 text-[10px] rounded border transition-colors text-center",
+                      prediction?.predicted_score === score
+                        ? "bg-emerald-600 border-emerald-500 text-white"
+                        : "bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600"
+                    )}
+                  >
+                    {score}
+                  </button>
+                ))
+              ) : (
+                <span className="text-xs text-gray-600 py-1 col-span-2 text-center">等待选手</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Actual Score Display */}

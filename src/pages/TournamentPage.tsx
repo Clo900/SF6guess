@@ -3,6 +3,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Header } from '@/components/layout/Header';
 import { Leaderboard } from '@/components/layout/Leaderboard';
 import { GroupStage } from '@/components/bracket/GroupStage';
+import { SeedChallengeStage } from '@/components/bracket/SeedChallengeStage';
 import { useTournament } from '@/components/providers/TournamentProvider';
 import { Button } from '@/components/ui/Button';
 import { Check, LogIn, LogOut } from 'lucide-react';
@@ -22,21 +23,21 @@ export const TournamentPage: React.FC = () => {
     leaderboard,
     tournament,
     loading,
-    currentUser
+    currentUser,
+    currentStageId,
+    setCurrentStageId,
+    getQualifiedTeams
   } = useTournament();
 
-  const [currentStageId, setCurrentStageId] = useState<string>('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (stages.length > 0 && !currentStageId) {
-      setCurrentStageId(stages[0].id);
-    }
-  }, [stages, currentStageId]);
-
+  const currentStage = stages.find(s => s.id === currentStageId);
   const currentGroups = groups.filter(g => g.stage_id === currentStageId);
   // Filter matches for current groups
   const currentMatches = matches.filter(m => currentGroups.some(g => g.id === m.group_id));
+
+  // Get Qualified Teams map for Stage 2
+  const qualifiedTeams = getQualifiedTeams();
   
   const handleSave = () => {
     if (!currentUser) {
@@ -108,14 +109,26 @@ export const TournamentPage: React.FC = () => {
         
         <main className="flex-1 overflow-auto bg-slate-900/30 p-8 relative scrollbar-thin scrollbar-thumb-emerald-900/50">
           <div className="min-w-fit pb-20">
-            <GroupStage 
-              groups={currentGroups}
-              matches={currentMatches}
-              predictions={predictions}
-              teams={teams}
-              onPredict={updatePrediction}
-              onClear={clearPrediction}
-            />
+            {currentStage?.name === '第二阶段' ? (
+              <SeedChallengeStage
+                groups={currentGroups}
+                matches={currentMatches}
+                predictions={predictions}
+                teams={teams}
+                qualifiedTeams={qualifiedTeams}
+                onPredict={updatePrediction}
+                onClear={clearPrediction}
+              />
+            ) : (
+              <GroupStage 
+                groups={currentGroups}
+                matches={currentMatches}
+                predictions={predictions}
+                teams={teams}
+                onPredict={updatePrediction}
+                onClear={clearPrediction}
+              />
+            )}
           </div>
         </main>
         
