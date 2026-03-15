@@ -15,7 +15,7 @@ interface TournamentContextType {
   setCurrentStageId: (id: string) => void;
   updatePrediction: (matchId: string, teamId: string, score?: string) => void;
   getQualifiedTeams: () => Record<string, Team>;
-  currentUser: any;clearPrediction: (matchId: string) => void;
+  clearPrediction: (matchId: string) => void;
   savePredictions: () => Promise<void>;
   currentUser: any;
 }
