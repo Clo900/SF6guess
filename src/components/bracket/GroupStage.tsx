@@ -164,7 +164,7 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                       <div className="absolute -left-3 top-1/2 -translate-y-1/2">
                          <ArrowRight className="w-5 h-5 text-emerald-500" />
                       </div>
-                      <span className="text-emerald-400 font-bold text-xl">A组第一</span>
+                      <span className="text-emerald-400 font-bold text-xl">{group.name}第一</span>
                       <TeamSlot 
                         id={`qualified-1-${group.id}`}
                         team={qualified1}
@@ -212,7 +212,7 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                       <div className="absolute -left-3 top-1/2 -translate-y-1/2">
                          <ArrowRight className="w-5 h-5 text-emerald-500" />
                       </div>
-                      <span className="text-emerald-400 font-bold text-xl">A组第二</span>
+                      <span className="text-emerald-400 font-bold text-xl">{group.name}第二</span>
                       <TeamSlot 
                         id={`qualified-2-${group.id}`}
                         team={qualified2}
