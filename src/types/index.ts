@@ -20,6 +20,8 @@ export interface Stage {
   tournament_id: string;
   name: string;
   order: number;
+  deadline?: string;
+  created_at?: string;
 }
 
 export interface Group {

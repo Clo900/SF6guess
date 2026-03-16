@@ -8,6 +8,7 @@ import { useTournament } from '@/components/providers/TournamentProvider';
 import { Button } from '@/components/ui/Button';
 import { Check, LogIn, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ToggleLeft, ToggleRight, Lock } from 'lucide-react';
 import { Timer } from '@/components/ui/Timer';
 
 export const TournamentPage: React.FC = () => {
@@ -26,9 +27,11 @@ export const TournamentPage: React.FC = () => {
     currentUser,
     currentStageId,
     setCurrentStageId,
-    getQualifiedTeams
+    getQualifiedTeams,
+    isStageLocked
   } = useTournament();
 
+  const [showActualResults, setShowActualResults] = useState(false);
   const navigate = useNavigate();
 
   const currentStage = stages.find(s => s.id === currentStageId);
@@ -39,7 +42,19 @@ export const TournamentPage: React.FC = () => {
   // Get Qualified Teams map for Stage 2
   const qualifiedTeams = getQualifiedTeams();
   
+  const isLocked = currentStageId ? isStageLocked(currentStageId) : false;
+  
+  // Get deadline for current stage for timer
+  const currentStageDeadline = currentStage?.deadline ? new Date(currentStage.deadline) : null;
+  // If no deadline set in DB, fallback to hardcoded (March 17)
+  const defaultTargetDate = new Date(new Date().getFullYear(), 2, 17);
+  const targetDate = currentStageDeadline || defaultTargetDate;
+  
   const handleSave = () => {
+    if (isLocked) {
+      alert('本阶段预测已锁定，无法修改。');
+      return;
+    }
     if (!currentUser) {
       navigate('/auth');
     } else {
@@ -61,23 +76,6 @@ export const TournamentPage: React.FC = () => {
       </Layout>
     );
   }
-
-  // Target date for countdown: March 17th of the current year (or next year if passed)
-  const getTargetDate = () => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    let target = new Date(currentYear, 2, 17); // Month is 0-indexed: 2 is March
-    
-    // If March 17th has passed this year, use next year (optional logic, but usually for upcoming events)
-    // For now, let's assume it's for the upcoming event. 
-    // If today is March 18th 2026, setting it to March 17th 2026 will show "Expired".
-    // If the user meant "March 17th" specifically relative to "now", we just use that date object.
-    
-    // Since env says today is 2026-03-15, March 17 2026 is in the future.
-    return target;
-  };
-
-  const targetDate = getTargetDate();
 
   return (
     <Layout>
@@ -108,6 +106,29 @@ export const TournamentPage: React.FC = () => {
       <div className="flex flex-1 overflow-hidden relative">
         
         <main className="flex-1 overflow-auto bg-slate-900/30 p-8 relative scrollbar-thin scrollbar-thumb-emerald-900/50">
+          <div className="flex justify-between items-center mb-6 px-8">
+             <div className="flex items-center gap-2">
+                <span className="text-gray-400 text-sm">显示实际赛果</span>
+                <button 
+                  onClick={() => setShowActualResults(!showActualResults)}
+                  className="focus:outline-none"
+                >
+                  {showActualResults ? (
+                    <ToggleRight className="w-8 h-8 text-emerald-500" />
+                  ) : (
+                    <ToggleLeft className="w-8 h-8 text-gray-500" />
+                  )}
+                </button>
+             </div>
+             
+             {isLocked && (
+               <div className="flex items-center gap-2 text-red-400 bg-red-900/20 px-3 py-1 rounded-full border border-red-500/20">
+                 <Lock className="w-4 h-4" />
+                 <span className="text-sm font-bold">本阶段预测已锁定</span>
+               </div>
+             )}
+          </div>
+
           <div className="min-w-fit pb-20">
             {currentStage?.name === '第二阶段' ? (
               <SeedChallengeStage
@@ -118,6 +139,8 @@ export const TournamentPage: React.FC = () => {
                 qualifiedTeams={qualifiedTeams}
                 onPredict={updatePrediction}
                 onClear={clearPrediction}
+                showActualResults={showActualResults}
+                isLocked={isLocked}
               />
             ) : (
               <GroupStage 
@@ -127,6 +150,8 @@ export const TournamentPage: React.FC = () => {
                 teams={teams}
                 onPredict={updatePrediction}
                 onClear={clearPrediction}
+                showActualResults={showActualResults}
+                isLocked={isLocked}
               />
             )}
           </div>

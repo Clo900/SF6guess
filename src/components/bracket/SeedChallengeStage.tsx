@@ -11,9 +11,21 @@ interface SeedChallengeStageProps {
   qualifiedTeams?: Record<string, Team>;
   onPredict: (matchId: string, teamId: string, score: string) => void;
   onClear?: (matchId: string) => void;
+  showActualResults?: boolean;
+  isLocked?: boolean;
 }
 
-export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({ groups, matches, predictions, teams, qualifiedTeams = {}, onPredict, onClear }) => {
+export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({ 
+  groups, 
+  matches, 
+  predictions, 
+  teams, 
+  qualifiedTeams = {}, 
+  onPredict, 
+  onClear,
+  showActualResults = false,
+  isLocked = false
+}) => {
   // Groups are E, F, G, H
   // Each group has 2 matches.
   // Match 1: Qualifier (e.g. B1 vs C2)
@@ -22,6 +34,11 @@ export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({ groups, 
   // Helper to get predicted winner team
   const getPredictedWinner = (match: Match | undefined) => {
     if (!match) return undefined;
+    
+    if (showActualResults) {
+        return match.winner_id ? teams.find(t => t.id === match.winner_id) : undefined;
+    }
+
     const prediction = predictions[match.id];
     
     // If prediction exists, use it
@@ -90,6 +107,8 @@ export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({ groups, 
                     onPredict={onPredict}
                     onClear={onClear}
                     format="FT4"
+                    showActualResults={showActualResults}
+                    isLocked={isLocked}
                   />
                 )}
                 {/* Arrow to middle */}
@@ -143,6 +162,8 @@ export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({ groups, 
                     onPredict={onPredict}
                     onClear={onClear}
                     format="FT4"
+                    showActualResults={showActualResults}
+                    isLocked={isLocked}
                   />
                 )}
                 {/* Group Label */}

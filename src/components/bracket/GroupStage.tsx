@@ -11,9 +11,20 @@ interface GroupStageProps {
   teams: Team[];
   onPredict: (matchId: string, teamId: string, score: string) => void;
   onClear?: (matchId: string) => void;
+  showActualResults?: boolean;
+  isLocked?: boolean;
 }
 
-export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predictions, teams, onPredict, onClear }) => {
+export const GroupStage: React.FC<GroupStageProps> = ({ 
+  groups, 
+  matches, 
+  predictions, 
+  teams, 
+  onPredict, 
+  onClear,
+  showActualResults = false,
+  isLocked = false
+}) => {
   return (
     <div className="flex flex-col gap-16 p-8 overflow-x-auto min-w-full pb-12">
       {groups.map((group) => {
@@ -23,6 +34,11 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
         const getPredictedWinner = (matchIndex: number) => {
           const match = groupMatches[matchIndex];
           if (!match) return undefined;
+          
+          if (showActualResults) {
+             return match.winner_id ? teams.find(t => t.id === match.winner_id) : undefined;
+          }
+
           const prediction = predictions[match.id];
           if (!prediction?.predicted_winner_id) return undefined;
           return teams.find(t => t.id === prediction.predicted_winner_id);
@@ -53,6 +69,8 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                           prediction={predictions[groupMatches[0].id]}
                           onPredict={onPredict}
                           onClear={onClear}
+                          showActualResults={showActualResults}
+                          isLocked={isLocked}
                         />
                       )}
                       {/* Arrows */}
@@ -80,6 +98,8 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                           prediction={predictions[groupMatches[1].id]}
                           onPredict={onPredict}
                           onClear={onClear}
+                          showActualResults={showActualResults}
+                          isLocked={isLocked}
                         />
                       )}
                        {/* Arrows */}
@@ -113,6 +133,8 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                         prediction={predictions[groupMatches[2].id]}
                         onPredict={onPredict}
                         onClear={onClear}
+                        showActualResults={showActualResults}
+                        isLocked={isLocked}
                       />
                     )}
                     {/* Arrows */}
@@ -139,6 +161,8 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                         prediction={predictions[groupMatches[3].id]}
                         onPredict={onPredict}
                         onClear={onClear}
+                        showActualResults={showActualResults}
+                        isLocked={isLocked}
                       />
                     )}
                     {/* Arrows */}
@@ -187,6 +211,8 @@ export const GroupStage: React.FC<GroupStageProps> = ({ groups, matches, predict
                         prediction={predictions[groupMatches[4].id]}
                         onPredict={onPredict}
                         onClear={onClear}
+                        showActualResults={showActualResults}
+                        isLocked={isLocked}
                       />
                     )}
                     {/* Arrows */}

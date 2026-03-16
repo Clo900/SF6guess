@@ -18,6 +18,7 @@ interface TournamentContextType {
   clearPrediction: (matchId: string) => void;
   savePredictions: () => Promise<void>;
   currentUser: any;
+  isStageLocked: (stageId: string) => boolean;
 }
 
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
@@ -124,6 +125,53 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     fetchData();
   }, []);
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (groups.length === 0) return;
+
+    const refreshMatches = async () => {
+      const { data: matchesData } = await supabase
+        .from('matches')
+        .select('*, team1:team1_id(*), team2:team2_id(*), winner:winner_id(*)')
+        .in('group_id', groups.map(g => g.id));
+      
+      if (matchesData) {
+        setMatches(matchesData);
+      }
+    };
+
+    const refreshPredictions = async () => {
+      const { data: allPredictionsData } = await supabase.from('predictions').select('*');
+      if (allPredictionsData) {
+        setAllPredictions(allPredictionsData);
+      }
+    };
+
+    // Subscribe
+    const channel = supabase
+      .channel('tournament_updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'matches' },
+        (payload) => {
+          console.log('Match update received:', payload);
+          refreshMatches();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'predictions' },
+        () => {
+          refreshPredictions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [groups]); // Re-subscribe if groups change (unlikely after init)
 
   // Calculate Leaderboard
   useEffect(() => {
@@ -239,6 +287,20 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     });
     
     return qualified;
+  };
+
+  const isStageLocked = (stageId: string) => {
+    const stage = stages.find(s => s.id === stageId);
+    if (!stage) return false;
+    
+    // Check deadline
+    if (stage.deadline) {
+      const deadline = new Date(stage.deadline);
+      const now = new Date();
+      return now > deadline;
+    }
+    
+    return false;
   };
 
   const updatePrediction = (matchId: string, teamId: string, score: string = '0:0') => {
@@ -406,7 +468,8 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       getQualifiedTeams,
       clearPrediction,
       savePredictions,
-      currentUser
+      currentUser,
+      isStageLocked
     }}>
       {children}
     </TournamentContext.Provider>
