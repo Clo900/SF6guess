@@ -4,7 +4,7 @@ import type { Duration } from 'date-fns';
 import { Clock } from 'lucide-react';
 
 interface TimerProps {
-  targetDate: string | Date;
+  targetDate: string | Date | null;
 }
 
 export const Timer: React.FC<TimerProps> = ({ targetDate }) => {
@@ -12,6 +12,12 @@ export const Timer: React.FC<TimerProps> = ({ targetDate }) => {
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
+    if (!targetDate) {
+      setIsExpired(false);
+      setTimeLeft(null);
+      return;
+    }
+
     const target = new Date(targetDate);
 
     const calculateTimeLeft = () => {
@@ -37,6 +43,15 @@ export const Timer: React.FC<TimerProps> = ({ targetDate }) => {
 
     return () => clearInterval(timer);
   }, [targetDate]);
+
+  if (!targetDate) {
+    return (
+      <div className="flex items-center text-emerald-400 gap-2">
+        <Clock className="w-4 h-4" />
+        <span>截止时间待定</span>
+      </div>
+    );
+  }
 
   if (isExpired) {
     return (

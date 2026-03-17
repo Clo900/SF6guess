@@ -46,9 +46,7 @@ export const TournamentPage: React.FC = () => {
   
   // Get deadline for current stage for timer
   const currentStageDeadline = currentStage?.deadline ? new Date(currentStage.deadline) : null;
-  // If no deadline set in DB, fallback to hardcoded (March 17)
-  const defaultTargetDate = new Date(new Date().getFullYear(), 2, 17);
-  const targetDate = currentStageDeadline || defaultTargetDate;
+  const targetDate = currentStageDeadline;
   
   const handleSave = () => {
     if (isLocked) {
