@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { Tournament, Stage, Group, Match, Team, Prediction, LeaderboardEntry } from '@/types';
+import type { Tournament, Stage, Group, Match, Team, Prediction, LeaderboardEntry, User } from '@/types';
 
 interface TournamentContextType {
   tournament: Tournament | null;
@@ -17,7 +17,7 @@ interface TournamentContextType {
   getQualifiedTeams: () => Record<string, Team>;
   clearPrediction: (matchId: string) => void;
   savePredictions: () => Promise<void>;
-  currentUser: any;
+  currentUser: User | null;
   isStageLocked: (stageId: string) => boolean;
 }
 
@@ -40,9 +40,9 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [predictions, setPredictions] = useState<Record<string, Prediction>>({});
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentStageId, setCurrentStageId] = useState<string>('');
-  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<Pick<User, 'id' | 'username' | 'nickname'>[]>([]);
   const [allPredictions, setAllPredictions] = useState<Prediction[]>([]);
 
   useEffect(() => {

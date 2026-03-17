@@ -1,7 +1,7 @@
 import React from 'react';
 import { MatchCard } from './MatchCard';
 import type { Group, Match, Prediction, Team } from '@/types';
-import { ArrowRight, ArrowDownRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface SeedChallengeStageProps {
   groups: Group[];

@@ -34,6 +34,37 @@ export const GroupStage: React.FC<GroupStageProps> = ({
             .filter(m => m.group_id === group.id)
             .sort((a, b) => a.id.localeCompare(b.id));
 
+        const getPredictedWinnerOfMatch = (m?: Match) => {
+           if (!m) return undefined;
+           const p = predictions[m.id];
+           return p?.predicted_winner_id ? teams.find(t => t.id === p.predicted_winner_id) : undefined;
+        };
+
+        const getPredictedLoserOfMatch = (m?: Match) => {
+           if (!m) return undefined;
+           const p = predictions[m.id];
+           if (!p?.predicted_winner_id) return undefined;
+           return m.team1_id === p.predicted_winner_id 
+              ? teams.find(t => t.id === m.team2_id) 
+              : teams.find(t => t.id === m.team1_id);
+        };
+        
+        const getPredictedLoserOfDerivedMatch = (m?: Match, p1?: Team, p2?: Team) => {
+            if (!m) return undefined;
+            const p = predictions[m.id];
+            if (!p?.predicted_winner_id) return undefined;
+            if (p.predicted_winner_id === p1?.id) return p2;
+            if (p.predicted_winner_id === p2?.id) return p1;
+            return undefined;
+        };
+        
+        const getPredictedWinnerOfDerivedMatch = (m?: Match, p1?: Team, p2?: Team) => {
+            if (!m) return undefined;
+            const p = predictions[m.id];
+            if (!p?.predicted_winner_id) return undefined;
+            return teams.find(t => t.id === p.predicted_winner_id);
+        };
+
         // Logic to determine participants for each match based on mode
         const getMatchParticipants = (matchIndex: number) => {
           const match = groupMatches[matchIndex];
@@ -63,21 +94,6 @@ export const GroupStage: React.FC<GroupStageProps> = ({
           const m1 = groupMatches[1];
           const m2 = groupMatches[2]; // WF
           const m3 = groupMatches[3]; // LR1
-          
-          const getPredictedWinnerOfMatch = (m?: Match) => {
-             if (!m) return undefined;
-             const p = predictions[m.id];
-             return p?.predicted_winner_id ? teams.find(t => t.id === p.predicted_winner_id) : undefined;
-          };
-
-          const getPredictedLoserOfMatch = (m?: Match) => {
-             if (!m) return undefined;
-             const p = predictions[m.id];
-             if (!p?.predicted_winner_id) return undefined;
-             return m.team1_id === p.predicted_winner_id 
-                ? teams.find(t => t.id === m.team2_id) 
-                : teams.find(t => t.id === m.team1_id);
-          };
 
           // Simulation
           const w0 = getPredictedWinnerOfMatch(m0);
@@ -100,20 +116,6 @@ export const GroupStage: React.FC<GroupStageProps> = ({
              // We need derived participants of M2 and M3
              const m2_participants = { team1: w0, team2: w1 };
              const m3_participants = { team1: l0, team2: l1 };
-             
-             const getPredictedLoserOfDerivedMatch = (m: Match, p1?: Team, p2?: Team) => {
-                const p = predictions[m.id];
-                if (!p?.predicted_winner_id) return undefined;
-                if (p.predicted_winner_id === p1?.id) return p2;
-                if (p.predicted_winner_id === p2?.id) return p1;
-                return undefined;
-             };
-             
-             const getPredictedWinnerOfDerivedMatch = (m: Match, p1?: Team, p2?: Team) => {
-                const p = predictions[m.id];
-                if (!p?.predicted_winner_id) return undefined;
-                return teams.find(t => t.id === p.predicted_winner_id);
-             };
 
              const l2 = getPredictedLoserOfDerivedMatch(m2, m2_participants.team1, m2_participants.team2);
              const w3 = getPredictedWinnerOfDerivedMatch(m3, m3_participants.team1, m3_participants.team2);
