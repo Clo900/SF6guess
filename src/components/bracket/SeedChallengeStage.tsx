@@ -99,17 +99,17 @@ export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({
             return (
               <div key={`qualifier-${group.id}`} className="relative">
                 {qualifierMatch && (
-                  <MatchCard
-                    match={qualifierMatch}
-                    team1={qTeam1}
-                    team2={qTeam2}
-                    prediction={predictions[qualifierMatch.id]}
-                    onPredict={onPredict}
-                    onClear={onClear}
-                    format="FT4"
-                    showActualResults={showActualResults}
-                    isLocked={isLocked}
-                  />
+                    <MatchCard
+                      match={qualifierMatch}
+                      team1={qTeam1}
+                      team2={qTeam2}
+                      prediction={predictions[qualifierMatch.id]}
+                      onPredict={onPredict}
+                      onClear={onClear}
+                      format="FT3"
+                      showActualResults={showActualResults}
+                      isLocked={isLocked}
+                    />
                 )}
                 {/* Arrow to middle */}
               </div>
@@ -154,17 +154,17 @@ export const SeedChallengeStage: React.FC<SeedChallengeStageProps> = ({
             return (
               <div key={`seed-${group.id}`} className="relative flex items-center gap-2">
                 {seedMatch && (
-                  <MatchCard
-                    match={seedMatch}
-                    team1={qualifierWinner || teams.find(t => t.id === seedMatch.team1_id)} // Fallback to DB if set later
-                    team2={teams.find(t => t.id === seedMatch.team2_id)}
-                    prediction={predictions[seedMatch.id]}
-                    onPredict={onPredict}
-                    onClear={onClear}
-                    format="FT4"
-                    showActualResults={showActualResults}
-                    isLocked={isLocked}
-                  />
+                    <MatchCard
+                      match={seedMatch}
+                      team1={qualifierWinner || teams.find(t => t.id === seedMatch.team1_id)} // Fallback to DB if set later
+                      team2={teams.find(t => t.id === seedMatch.team2_id)}
+                      prediction={predictions[seedMatch.id]}
+                      onPredict={onPredict}
+                      onClear={onClear}
+                      format="FT3"
+                      showActualResults={showActualResults}
+                      isLocked={isLocked}
+                    />
                 )}
                 {/* Group Label */}
                 <div className="flex items-center justify-center w-8 h-full min-h-[64px] rounded bg-blue-900/30 border border-blue-500/30 text-blue-400 font-bold writing-vertical-rl text-xs py-2 ml-2 self-stretch">

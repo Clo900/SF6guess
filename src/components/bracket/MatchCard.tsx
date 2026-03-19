@@ -27,8 +27,11 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   isLocked = false
 }) => {
   const isFT4 = format === 'FT4';
+  const isFT3 = format === 'FT3';
   const scoreOptions = isFT4 
     ? ['4:0', '4:1', '4:2', '4:3', '3:4', '2:4', '1:4', '0:4']
+    : isFT3
+    ? ['3:0', '3:1', '3:2', '2:3', '1:3', '0:3']
     : ['2:0', '2:1', '1:2', '0:2'];
 
   const handleScoreSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -87,9 +90,9 @@ export const MatchCard: React.FC<MatchCardProps> = ({
     
     let score = '0:0';
     if (team1 && teamId === team1.id) {
-       score = isFT4 ? '4:0' : '2:0';
+       score = isFT4 ? '4:0' : isFT3 ? '3:0' : '2:0';
     } else if (team2 && teamId === team2.id) {
-       score = isFT4 ? '0:4' : '0:2';
+       score = isFT4 ? '0:4' : isFT3 ? '0:3' : '0:2';
     }
     
     onPredict(match.id, teamId, score);
@@ -172,7 +175,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
              </div>
           ) : (
              <>
-                {isFT4 ? (
+                {isFT4 || isFT3 ? (
                     <select
                     value={displayScore || ''}
                     onChange={handleScoreSelect}

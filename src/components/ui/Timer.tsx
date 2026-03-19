@@ -30,6 +30,8 @@ export const Timer: React.FC<TimerProps> = ({ targetDate }) => {
         return;
       }
 
+      setIsExpired(false);
+
       const duration = intervalToDuration({
         start: now,
         end: target,

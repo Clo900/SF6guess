@@ -148,6 +148,18 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
     };
 
+    const refreshStages = async () => {
+      if (!tournament) return;
+      const { data: stagesData } = await supabase
+        .from('stages')
+        .select('*')
+        .eq('tournament_id', tournament.id)
+        .order('order');
+      if (stagesData) {
+        setStages(stagesData);
+      }
+    };
+
     // Subscribe
     const channel = supabase
       .channel('tournament_updates')
@@ -166,12 +178,19 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           refreshPredictions();
         }
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'stages' },
+        () => {
+          refreshStages();
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [groups]); // Re-subscribe if groups change (unlikely after init)
+  }, [groups, tournament]); // Re-subscribe if groups or tournament change
 
   // Calculate Leaderboard
   useEffect(() => {
